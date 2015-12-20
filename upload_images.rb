@@ -12,7 +12,7 @@ end
 
 def upload
   album_id = '108996499474628'
-  fb_oauth_token = 'CAACEdEose0cBAJkt6HOdZA7mOZBtb0MWavuwl5mSVHj66a2Tj97GLzxguFWAea3hxa6BRqEaWTRZAiiLjCU9gewTxlGzytFK63VJKV7fHzRIphZCQClMiZC6akuUFNxqEK34TZBhPbumZClCCGNhZCRAj2v9tZChAdZBJF7txNrH56Od1fwUaZCv2oQpnjiEHlCDrbwwZB1UWm4ZCg37GAcgJELUo'
+  fb_oauth_token = 'CAACEdEose0cBALLQZCkcdh4PQN4HnWSPverOGejiZAXX8jRyZACyJaT3AEVatjSCA7rf1xpZANq4yZB30MGgoe01rlM9DrdIZBa3HCbGJSDh7RVat6nDSF9pjyUIW6L2zSSPereQNYRtPkyR9d8FhhtGZCPL8LibE2uCgu9BohyO1GhsitWXCtMdRfpZAPEYdoNftZAd5etpNMbZBPlXs6GZBbJ'
 
   # Set message
   message = '#HackFMI6 Having fun with Photo Booth project.'
@@ -30,14 +30,14 @@ def upload
   @graph = Koala::Facebook::API.new(fb_oauth_token)
 
   all_images.each do |img_name|
-    twit_image = File.new('./images/' + img_name) 
-    fb_image = File.new('./images/' + img_name) 
+    twit_image = File.new('./images/' + img_name)
+    fb_image = File.new('./images/' + img_name)
 
     begin
       client.update_with_media(message, twit_image)
       @graph.put_picture(fb_image, 'feed', { message: message }, album_id)
     rescue Exception => e
-      p e 
+      p e
     end
   end
 end

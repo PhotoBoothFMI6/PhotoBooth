@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>PhotoBooth</title>
+	<meta charset="utf-8">
+	<script type="text/javascript" src="./assets/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+	<div id="firstInstructions" style="text-align: center;">
+		<h1>Усмихни се и натисни бутона!</h1>
+		<!-- <img width="500px" height="500px" src="./assets/smiley.png"> -->
+		<img width="800px" src="./live_view.mjpg">
+	</div>
+
+	<div id="secondInstructions" style="display: none; text-align: center;">
+		<h1>Супер снимка! Ако ти харесва, натисни отново, за да я качиш!</h1>
+		<h2>Снимката ще се изтрие след: <span>0</span></h2>
+		<img src="" width="600px">
+	</div>
+
+	<div id="thirdInstructions" style="display: none; text-align: center;">
+		<h1>Браво! Твоята снимка е успешно качена в социалните мрежи!</h1>
+		<img src="./assets/social_networks.png">
+	</div>
+
+	<script type="text/javascript">
+	$(function() {
+		var firstInstructions = $('#firstInstructions');
+		var secondInstructions = $('#secondInstructions');
+		var thirdInstructions = $('#thirdInstructions');
+		var timer = secondInstructions.find('h2').find('span');
+		var liveView = firstInstructions.find('img');
+
+		var checkImageInterval = true;
+		setInterval(checkImage, 1500);
+
+		setInterval(function() {
+			d = new Date();
+			liveView.attr('src', './live_view.mjpg?'+d.getTime());
+		}, 10);
+
+		function checkImage() {
+			if(checkImageInterval) {
+				$.ajax({
+					url: "http://127.0.0.1:4567/check",
+					type: "GET"
+				}).complete(function(xhr) {
+					data = xhr.responseText;
+
+					if(!data || 0 === data.length) {
+						checkImageInterval = true
+					} else {
+						checkImageInterval = false
+						secondInstructions.find('img').attr('src', './images/'+data);
+						timer.html(10);
+						firstInstructions.fadeOut();
+						secondInstructions.fadeIn();
+						setTimeout(updateTimer, 1000);
+					}
+				});
+			}
+		}
+
+		timer_done = false;
+
+		function updateTimer() {
+			if(timer_done) {
+				timer_done = false;
+				return;
+			}
+
+			var seconds = parseInt(timer.html());
+			if(seconds > 0) {
+				$.ajax({
+					url: "http://127.0.0.1:4567/upload",
+					type: "GET"
+				}).complete(function(xhr) {
+					data = xhr.responseText;
+					if(data == 'Uploaded!') {
+						secondInstructions.fadeOut();
+						thirdInstructions.fadeIn();
+						setTimeout(function() {
+							thirdInstructions.fadeOut();
+							firstInstructions.fadeIn();
+							checkImageInterval = true
+						}, 2000);
+						timer_done = true;
+					} else {
+						timer_done = false;
+					}
+				});
+				timer.html(seconds-1);
+				setTimeout(updateTimer, 1000);
+			} else {
+				secondInstructions.fadeOut();
+				firstInstructions.fadeIn();
+				checkImageInterval = true;
+			}
+		}
+	});
+	</script>
+</body>
+</html>
